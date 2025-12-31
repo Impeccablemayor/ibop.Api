@@ -1,6 +1,7 @@
 ﻿using ibop.Api.DTOs;
 using ibop.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace ibop.Api.Controllers
 {
@@ -16,26 +17,32 @@ namespace ibop.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll() => Ok(_userService.GetAll());
+        public IActionResult GetAll() => Ok(_userService.GetAllAsync());
 
         [HttpPost]
-        public IActionResult Create(CreateUserDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateUserDto dto)
         {
-            var user = _userService.Create(dto);
-            return CreatedAtAction(nameof(GetAll), new { id = user.Id }, user);
+            var user = await _userService.CreateAsync(dto);
+
+            return CreatedAtAction(
+                nameof(GetAll),
+                new { id = user.Id },
+                user
+            );
         }
 
+
         [HttpPut("{id}/activate")]
-        public IActionResult Activate(int id)
+        public async Task<IActionResult> Activate(int id)
         {
-            _userService.Activate(id);
+            await _userService.ActivateAsync(id);
             return NoContent();
         }
 
         [HttpPut("{id}/deactivate")]
-        public IActionResult Deactivate(int id)
+        public async Task<IActionResult> Deactivate(int id)
         {
-            _userService.Deactivate(id);
+            await _userService.DeactivateAsync(id);
             return NoContent();
         }
     }

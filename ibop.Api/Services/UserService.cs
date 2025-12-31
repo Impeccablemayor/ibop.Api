@@ -1,4 +1,5 @@
 ﻿using ibop.Api.Data;
+using ibop.Api.DTOs;
 using ibop.Api.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,62 +9,87 @@ namespace ibop.Api.Services
     public class UserService : IUserService
     {
         private readonly IbopDbContext _context;
-        private readonly PasswordHasher<User> _passwordHasher = new();
+        private readonly PasswordHasher<User> _passwordHasher;
 
         public UserService(IbopDbContext context)
         {
             _context = context;
+            _passwordHasher = new PasswordHasher<User>();
         }
 
-        public User Create(User user, string password)
+        public async Task<User> CreateAsync(CreateUserDto dto)
         {
-            user.PasswordHash = _passwordHasher.HashPassword(user, password);
+            var user = new User
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
+                Role = dto.Role,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            // ✅ Correct password hashing
+            user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
+
             _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
             return user;
         }
 
-        public User? Authenticate(string email, string password)
+        public async Task<User?> AuthenticateAsync(string email, string password)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
-            if (user == null) return null;
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email && u.IsActive);
 
-            var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+            if (user == null)
+                return null;
+
+            var result = _passwordHasher.VerifyHashedPassword(
+                user,
+                user.PasswordHash,
+                password
+            );
+
             return result == PasswordVerificationResult.Success ? user : null;
         }
 
-        public IEnumerable<User> GetAll() => _context.Users.ToList();
-
-        public User? GetById(int id) => _context.Users.Find(id);
-
-        public void Activate(int id)
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
-            var user = GetById(id);
-            if (user != null)
-            {
-                user.IsActive = true;
-                _context.SaveChanges();
-            }
+            return await _context.Users.ToListAsync();
         }
 
-        public void Deactivate(int id)
+        public async Task<User?> GetByIdAsync(int id)
         {
-            var user = GetById(id);
-            if (user != null)
-            {
-                user.IsActive = false;
-                _context.SaveChanges();
-            }
+            return await _context.Users.FindAsync(id);
         }
 
-        public void ResetPassword(int id, string newPassword)
+        public async Task ActivateAsync(int id)
         {
-            var user = GetById(id);
-            if (user != null)
-            {
-                user.PasswordHash = _passwordHasher.HashPassword(user, newPassword);
-                _context.SaveChanges();
-            }
+            var user = await GetByIdAsync(id);
+            if (user == null) return;
+
+            user.IsActive = true;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeactivateAsync(int id)
+        {
+            var user = await GetByIdAsync(id);
+            if (user == null) return;
+
+            user.IsActive = false;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ResetPasswordAsync(int id, string newPassword)
+        {
+            var user = await GetByIdAsync(id);
+            if (user == null) return;
+
+            user.PasswordHash = _passwordHasher.HashPassword(user, newPassword);
+            await _context.SaveChangesAsync();
         }
     }
 }

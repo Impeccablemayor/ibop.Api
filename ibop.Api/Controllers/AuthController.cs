@@ -1,26 +1,30 @@
-﻿using ibop.Api.DTOs;
+﻿using ibop.Api.Dtos.Auth;
+using ibop.Api.DTOs;
 using ibop.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ibop.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly AuthService _authService;
+        private readonly AuthService _auth;
 
-        public AuthController(AuthService authService)
+        public AuthController(AuthService auth)
         {
-            _authService = authService;
+            _auth = auth;
         }
 
         [HttpPost("login")]
-        public IActionResult Login(LoginRequestDto dto)
+        public async Task<IActionResult> Login(LoginRequestDto dto)
         {
-            var token = _authService.Login(dto);
-            return Ok(new { token });
+            var result = await _auth.LoginAsync(dto);
+
+            if (result == null)
+                return Unauthorized("Invalid credentials");
+
+            return Ok(result);
         }
     }
-
 }

@@ -1,55 +1,55 @@
 ﻿using ibop.Api.Data;
+using ibop.Api.Dtos.Auth;
+using ibop.Api.DTOs;
+using ibop.Api.Entities;
 using ibop.Api.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
-public class AuthService
+namespace ibop.Api.Services
 {
-    private readonly IbopDbContext _context;
-    private readonly IPasswordHasher<User> _passwordHasher;
-    private readonly JwtHelper _jwtHelper;
-
-    public AuthService(IbopDbContext context, IPasswordHasher<User> passwordHasher, JwtHelper jwtHelper)
+    public class AuthService
     {
-        _context = context;
-        _passwordHasher = passwordHasher;
-        _jwtHelper = jwtHelper;
-    }
+        private readonly IbopDbContext _db;
+        private readonly JwtHelper _jwt;
+        private readonly PasswordHasher<User> _passwordHasher;
 
-    public async Task<User> RegisterAsync(string email, string password, string firstName, string lastName)
-    {
-        if (await _context.Users.AnyAsync(u => u.Email == email))
-            throw new Exception("User already exists");
-
-        var user = new User
+        public AuthService(IbopDbContext db, JwtHelper jwt)
         {
-            Email = email,
-            FirstName = firstName,
-            LastName = lastName
-        };
+            _db = db;
+            _jwt = jwt;
+            _passwordHasher = new PasswordHasher<User>();
+        }
 
-        user.PasswordHash = _passwordHasher.HashPassword(user, password);
+        public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto)
+        {
+            var user = await _db.Users
+                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.IsActive);
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+            if (user == null)
+                return null;
 
-        return user;
-    }
+            var result = _passwordHasher.VerifyHashedPassword(
+                user,
+                user.PasswordHash,
+                dto.Password
+            );
 
-    public async Task<string> LoginAsync(string email, string password)
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        if (user == null)
-            throw new Exception("Invalid credentials");
+            if (result != PasswordVerificationResult.Success)
+                return null;
 
-        var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
-        if (result != PasswordVerificationResult.Success)
-            throw new Exception("Invalid credentials");
+            var token = _jwt.GenerateToken(
+                user.Id,
+                user.Email,
+                user.Role.ToString()
+            );
 
-        return _jwtHelper.GenerateToken(user);
+            return new LoginResponseDto
+            {
+                Token = token,
+                Role = user.Role.ToString(),
+                FullName = $"{user.FirstName} {user.LastName}"
+            };
+        }
     }
 }
