@@ -1,9 +1,13 @@
-﻿namespace ibop.Api.Dtos.Auth
+﻿using ibop.Api.DTOs.Auth;
+
+namespace ibop.Api.Dtos.Auth
 {
     public class LoginResponseDto
     {
-        public string Token { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
-        public string FullName { get; set; } = string.Empty;
+        public string Token { get; set; } = default!;
+        public string Role { get; set; } = default!;
+        public UserDto User { get; set; } = default!;
     }
+
+}
 }

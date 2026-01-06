@@ -1,6 +1,6 @@
 ﻿using ibop.Api.Data;
 using ibop.Api.Dtos.Auth;
-using ibop.Api.DTOs;
+using ibop.Api.DTOs.Auth;
 using ibop.Api.Entities;
 using ibop.Api.Helpers;
 using Microsoft.AspNetCore.Identity;
@@ -24,7 +24,7 @@ namespace ibop.Api.Services
         public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto)
         {
             var user = await _db.Users
-                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.IsActive);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == dto.Email.ToLower() && u.IsActive);
 
             if (user == null)
                 return null;
@@ -35,7 +35,7 @@ namespace ibop.Api.Services
                 dto.Password
             );
 
-            if (result != PasswordVerificationResult.Success)
+            if (result == PasswordVerificationResult.Failed)
                 return null;
 
             var token = _jwt.GenerateToken(
@@ -48,7 +48,13 @@ namespace ibop.Api.Services
             {
                 Token = token,
                 Role = user.Role.ToString(),
-                FullName = $"{user.FirstName} {user.LastName}"
+                User = new UserDto
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName
+                }
             };
         }
     }
