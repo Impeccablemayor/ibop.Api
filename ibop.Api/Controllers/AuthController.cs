@@ -1,5 +1,4 @@
-﻿using ibop.Api.Dtos.Auth;
-using ibop.Api.DTOs;
+﻿using ibop.Api.DTOs;
 using ibop.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 

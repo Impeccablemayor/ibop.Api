@@ -10,4 +10,3 @@ namespace ibop.Api.DTOs.Auth
     }
 
 }
-}
