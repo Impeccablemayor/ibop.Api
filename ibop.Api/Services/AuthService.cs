@@ -1,5 +1,5 @@
 ﻿using ibop.Api.Data;
-using ibop.Api.Dtos.Auth;
+using ibop.Api.DTOs;
 using ibop.Api.DTOs.Auth;
 using ibop.Api.Entities;
 using ibop.Api.Helpers;

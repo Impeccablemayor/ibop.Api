@@ -1,6 +1,6 @@
 ﻿using ibop.Api.DTOs.Auth;
 
-namespace ibop.Api.Dtos.Auth
+namespace ibop.Api.DTOs.Auth
 {
     public class LoginResponseDto
     {
