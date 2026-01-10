@@ -84,6 +84,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<IbopDbContext>();
+    await DatabaseSeeder.SeedAsync(db);
+}
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication(); // Must be before Authorization

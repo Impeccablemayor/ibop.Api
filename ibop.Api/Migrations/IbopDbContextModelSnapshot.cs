@@ -58,42 +58,7 @@ namespace ibop.Api.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("680645ce-8113-4c18-80f3-280b360660e8"),
-                            CreatedAt = new DateTime(2026, 1, 8, 1, 23, 34, 353, DateTimeKind.Utc).AddTicks(1364),
-                            Email = "admin@ibop.com",
-                            FirstName = "Admin",
-                            IsActive = true,
-                            LastName = "User",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDpdvmeQzPk5OLaDSSu50a1kq3D7wvZuPZrwibwh894aF3uEv8T/P0gd8A63j5yBZg==",
-                            Role = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("252d9f88-7d28-4b90-80fe-6839baaa2722"),
-                            CreatedAt = new DateTime(2026, 1, 8, 1, 23, 34, 438, DateTimeKind.Utc).AddTicks(4356),
-                            Email = "manager@ibop.com",
-                            FirstName = "Manager",
-                            IsActive = true,
-                            LastName = "User",
-                            PasswordHash = "AQAAAAIAAYagAAAAEC5Su+fB1vyE4ar9Iy42dFH/tjQQ80cbbyJmQdqWMrRYv0hrC8XkylI+I/AC9VEUvw==",
-                            Role = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("010efa23-1c78-4fdb-b40f-a1dde436ec70"),
-                            CreatedAt = new DateTime(2026, 1, 8, 1, 23, 34, 509, DateTimeKind.Utc).AddTicks(9526),
-                            Email = "staff@ibop.com",
-                            FirstName = "Staff",
-                            IsActive = true,
-                            LastName = "User",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFnyf5FrHyc99YDTItZa1Wm/JQ/vsKNXh/O5btB5nvzE/t+9JtzmuGLEjIKLTiNLbg==",
-                            Role = 2
-                        });
+                    b.ToTable("Users", (string)null);
                 });
 #pragma warning restore 612, 618
         }
